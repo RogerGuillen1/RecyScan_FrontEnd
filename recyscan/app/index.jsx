@@ -1,6 +1,7 @@
 import { View, Text, Pressable, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
+import { LOCAL_URL } from '@env';
 
 const index =()=>{
 
@@ -46,7 +47,7 @@ const index =()=>{
       type: 'image/jpeg',
     });
     try {
-      const response = await fetch('http://192.168.1.136:5000/predict', {
+      const response = await fetch(`${LOCAL_URL}/predict`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -79,7 +80,11 @@ const index =()=>{
         </Pressable>
         </View>
       )}
-        {answer && <Text style={{ marginTop: 20, fontSize: 16 }}>Respuesta: {answer.category}</Text>}
+        {answer && 
+        <View>
+          <Text style={{ marginTop: 20, fontSize: 16 }}>Categoria: {answer.category}</Text>
+          <Text style={{ marginTop: 10, fontSize: 16 }}>Probabilidad: {answer.confidence}</Text>
+          </View>}
         </View>
 }
 
@@ -104,5 +109,9 @@ button:{
 buttonText:{
     color:'#FFFFFF',
     fontSize:16,
-    textAlign:'center'}
+    textAlign:'center'},
+answerText:{
+    marginTop:20,
+    fontSize:16
+}
 }
