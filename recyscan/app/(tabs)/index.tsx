@@ -1,7 +1,6 @@
-import { View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable, Image, BackHandler } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
-import { LOCAL_URL } from '@env';
 
 const index =()=>{
 
@@ -18,6 +17,8 @@ const index =()=>{
     },[]);
     
   const openCamera = async () => {
+
+    console.log("Opening camera");
 
     if (!permission) {
       alert('Camera permission is required');
@@ -37,6 +38,8 @@ const index =()=>{
 
   const sendPhoto = async () => {
 
+    console.log("Preparing to send photo to server");
+
     
     if (!photo) return;
     
@@ -46,8 +49,10 @@ const index =()=>{
       name: 'photo.jpg',
       type: 'image/jpeg',
     });
+
+    console.log("FormData prepared:", formData);
     try {
-      const response = await fetch(`${LOCAL_URL}/predict`, {
+      const response = await fetch(`${'http://192.168.1.136:5000'}/predict`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -63,6 +68,8 @@ const index =()=>{
       console.error('Error uploading photo:', error);
     }
     };
+
+    console.log(answer)
 
     return <View style={styles.container}>
         <Text style={styles.title}>RecyScan</Text>
@@ -82,8 +89,10 @@ const index =()=>{
       )}
         {answer && 
         <View>
-          <Text style={{ marginTop: 20, fontSize: 16 }}>Categoria: {answer.category}</Text>
-          <Text style={{ marginTop: 10, fontSize: 16 }}>Probabilidad: {answer.confidence}</Text>
+          <Text style={{ marginTop: 20, fontSize: 16 }}>Categoria: {answer.categoria}</Text>
+          <Text style={{ marginTop: 10, fontSize: 16 }}>Probabilidad: {answer.confianza}</Text>
+          <Text style={{ marginTop: 10, fontSize: 16 }}>Contenedor: {answer.contenedor}</Text>
+          <Text style={{ marginTop: 10, fontSize: 16 }}>Instrucciones: {answer.instruccion}</Text>
           </View>}
         </View>
 }
@@ -94,7 +103,8 @@ const styles ={
 container:{
     flex:1,
     justifyContent:'center',
-    alignItems:'center'
+    alignItems:'center',
+    backgroundColor:'#d3d3d3'
 },
 title:{
     fontSize:20,
