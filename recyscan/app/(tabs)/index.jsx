@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Image, BackHandler } from 'react-native';
+import { View, Text, Pressable, Image, BackHandler, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 
@@ -7,6 +7,7 @@ const index =()=>{
     const [photo, setPhoto] = useState(null);
     const [permission, setPermission] = useState(null);
     const [answer, setAnswer] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const askPermission = async()=>{
@@ -17,8 +18,9 @@ const index =()=>{
     },[]);
     
   const openCamera = async () => {
-
-    console.log("Opening camera");
+    // Clear previous photo/answer when taking a new one
+    setPhoto(null);
+    setAnswer(null);
 
     if (!permission) {
       alert('Camera permission is required');
@@ -38,11 +40,14 @@ const index =()=>{
 
   const sendPhoto = async () => {
 
-    console.log("Preparing to send photo to server");
-
-    
     if (!photo) return;
     
+    // 1. Set loading to true and clear previous answer
+    setLoading(true);
+    setAnswer(null); // <--- Clears the previous result immediately
+
+    console.log("Preparing to send photo to server");
+
     const formData = new FormData();
     formData.append('file', {
       uri: photo,
@@ -66,15 +71,18 @@ const index =()=>{
       setAnswer(data);
     } catch (error) {
       console.error('Error uploading photo:', error);
+      // Optional: set an error message in state
+    } finally{
+      setLoading(false);
     }
     };
 
     console.log(answer)
 
     return <View style={styles.container}>
-        <Text style={styles.title}>RecyScan</Text>
+        <Image source={require("../../assets/images/logotext.png")} style={styles.image}/>
         <Pressable onPress={openCamera} style={styles.button}>
-            <Text style={styles.buttonText}>Hacer foto</Text>
+            <Text style={styles.buttonText}>{!photo?"Hacer foto":"Repetir foto"}</Text>
         </Pressable>
         {photo && (
             <View>
@@ -82,17 +90,34 @@ const index =()=>{
           source={{ uri: photo }}
           style={{ width: 200, height: 200, marginTop: 20 }}
         />
-        <Pressable onPress={sendPhoto} style={styles.button}>
-            <Text style={styles.buttonText}>Enviar foto</Text>
+        {!answer && (
+
+          <Pressable 
+          onPress={sendPhoto} 
+          style={[styles.button, loading && styles.buttonDisabled]} 
+          disabled={loading} // Disable press while loading
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" /> // Show loading circle
+            ) : (
+              <Text style={styles.buttonText}>Enviar foto</Text> // Show text when not loading
+            )}
         </Pressable>
+            )}
         </View>
       )}
-        {answer && 
-        <View>
-          <Text style={{ marginTop: 20, fontSize: 16 }}>Categoria: {answer.categoria}</Text>
-          <Text style={{ marginTop: 10, fontSize: 16 }}>Probabilidad: {answer.confianza}</Text>
-          <Text style={{ marginTop: 10, fontSize: 16 }}>Contenedor: {answer.contenedor}</Text>
-          <Text style={{ marginTop: 10, fontSize: 16 }}>Instrucciones: {answer.instruccion}</Text>
+        {answer ?
+        <View style={styles.answerContainer}>
+          <Text style={styles.answerText}>Categoria: {answer.categoria}</Text>
+          <Text style={styles.answerText}>Probabilidad: {(answer.confianza.toFixed(4)*100).toFixed(2)} %</Text>
+          <Text style={styles.answerText}>Contenedor: {answer.contenedor}</Text>
+          <Text style={styles.answerText}>Instrucciones: {answer.instruccion}</Text>
+          </View>:
+          <View style={styles.answerContainer}>
+          <Text style={styles.answerText}> </Text>
+          <Text style={styles.answerText}> </Text>
+          <Text style={styles.answerText}> </Text>
+          <Text style={styles.answerText}> </Text>
           </View>}
         </View>
 }
@@ -104,24 +129,35 @@ container:{
     flex:1,
     justifyContent:'center',
     alignItems:'center',
-    backgroundColor:'#d3d3d3'
+    backgroundColor:'#333b3f',
+    marginTop: -50
 },
-title:{
-    fontSize:20,
-    fontWeight:'bold'
+image:{
+      width: 230,
+      height: 200,
+      resizeMode: 'contain'
 },
 button:{
     marginTop:20,
     padding:10,
     backgroundColor:'#007AFF',
-    borderRadius:5
+    borderRadius:5,
+    minWidth: 100, // Added minWidth to maintain size during loading
+    justifyContent: 'center', // Center content
+},
+buttonDisabled:{ // Optional style for when the button is disabled
+    backgroundColor:'#8aaee0'
 },
 buttonText:{
     color:'#FFFFFF',
     fontSize:16,
     textAlign:'center'},
 answerText:{
+    fontSize:16,
+    color:'#d7d7d7'
+},
+answerContainer:{
     marginTop:20,
-    fontSize:16
-}
-}
+    alignItems:'center',
+  gap: 10
+}}
