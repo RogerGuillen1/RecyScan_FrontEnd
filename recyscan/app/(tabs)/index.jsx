@@ -77,8 +77,6 @@ const index =()=>{
     }
     };
 
-    console.log(answer)
-
     return <View style={styles.container}>
         <Image source={require("../../assets/images/logotext.png")} style={styles.image}/>
         <Pressable onPress={openCamera} style={styles.button}>
