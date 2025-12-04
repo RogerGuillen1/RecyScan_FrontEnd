@@ -7,7 +7,8 @@ const categoryNames = {
     "organic": "Orgánico",
     "clothes": "Textil",
     "vegetation": "Vegetación",
-    "miscellaneous": "Misceláneo"
+    "miscellaneous": "Misceláneo",
+    "shoes": "Calzado"
 }
 
 export default categoryNames;
