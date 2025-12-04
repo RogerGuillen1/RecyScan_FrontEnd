@@ -1,6 +1,7 @@
 import { View, Text, Pressable, Image, BackHandler, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
+import categoryNames from '../../constants/categoryNames';
 
 const index =()=>{
 
@@ -57,7 +58,9 @@ const index =()=>{
 
     console.log("FormData prepared:", formData);
     try {
-      const response = await fetch(`${'http://192.168.1.136:5000'}/predict`, {
+      const url = 'https://recyscan-backend.onrender.com/';
+      console.log(url)
+      const response = await fetch(`${url}predict`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -106,7 +109,7 @@ const index =()=>{
       )}
         {answer ?
         <View style={styles.answerContainer}>
-          <Text style={styles.answerText}>Categoria: {answer.categoria}</Text>
+          <Text style={styles.answerText}>Categoria: {categoryNames[answer.categoria] || answer.categoria}</Text>
           <Text style={styles.answerText}>Probabilidad: {(answer.confianza.toFixed(4)*100).toFixed(2)} %</Text>
           <Text style={styles.answerText}>Contenedor: {answer.contenedor}</Text>
           <Text style={styles.answerText}>Instrucciones: {answer.instruccion}</Text>
