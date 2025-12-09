@@ -2,6 +2,9 @@ import { View, Text, Pressable, Image, BackHandler, ActivityIndicator } from 're
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import categoryNames from '../../constants/categoryNames';
+import get from '../../constants/get';
+import ModalCategories from '../../components/ModalCategories';
+import InfoCircleIcon from '../../assets/svg/InfoIcon';
 
 const index =()=>{
 
@@ -9,7 +12,16 @@ const index =()=>{
     const [permission, setPermission] = useState(null);
     const [answer, setAnswer] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [categoriesList, setCategoriesList] = useState([]);
 
+    const getCategories = async () => {
+      try {
+        const response = await get('categories');
+        setCategoriesList(response.categories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    }
     useEffect(() => {
         const askPermission = async()=>{
         const cameraStatus = await ImagePicker.requestCameraPermissionsAsync();
@@ -59,7 +71,6 @@ const index =()=>{
     console.log("FormData prepared:", formData);
     try {
       const url = 'https://recyscan-backend.onrender.com/';
-      console.log(url)
       const response = await fetch(`${url}predict`, {
         method: 'POST',
         body: formData,
@@ -80,7 +91,11 @@ const index =()=>{
     }
     };
 
-    return <View style={styles.container}>
+    return <>
+    <View style={styles.container}>
+      <Pressable onPress={getCategories} style={{position: 'absolute', top: 100, right: 20}}>
+        <InfoCircleIcon/>
+        </Pressable>
         <Image source={require("../../assets/images/logotext.png")} style={styles.image}/>
         <Pressable onPress={openCamera} style={styles.button}>
             <Text style={styles.buttonText}>{!photo?"Hacer foto":"Repetir foto"}</Text>
@@ -121,9 +136,15 @@ const index =()=>{
           <Text style={styles.answerText}> </Text>
           </View>}
         </View>
+        {categoriesList.length>0 &&
+        <ModalCategories categories={categoriesList} onClose={()=>{
+          setCategoriesList([]);
+        }} />
+      }
+    </>
 }
 
-export default index;
+export default index; 
 
 const styles ={
 container:{
