@@ -109,7 +109,7 @@ const index =()=>{
       )}
         {answer ?
         <View style={styles.answerContainer}>
-          <Text style={styles.answerText}>Categoria: {categoryNames[answer.categoria] || answer.categoria}</Text>
+          <Text style={styles.answerText}>Categoria: {answer?.nombre||categoryNames[answer.categoria]}</Text>
           <Text style={styles.answerText}>Probabilidad: {(answer.confianza.toFixed(4)*100).toFixed(2)} %</Text>
           <Text style={styles.answerText}>Contenedor: {answer.contenedor}</Text>
           <Text style={styles.answerText}>Instrucciones: {answer.instruccion}</Text>
