@@ -10,7 +10,6 @@ const get=async (endpoint)=>{
         },
     });
     const json = await response.json();
-    console.log(json)
     return json;
 } catch (error) {
     console.error(`Error fetching ${endpoint}:`, error);

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, View, Text } from 'react-native';
 import get from '../constants/get';
 import ModalDetails from './ModalDetails';
+import categoryNames from '@/constants/categoryNames';
 
 const ModalCategories = ({ categories, onClose }) => {
 
@@ -9,7 +10,7 @@ const ModalCategories = ({ categories, onClose }) => {
 
     const fetchCategory = async(category) => {
         try {
-            const response = await get(`info/${category}`);
+            const response = await get(`categories/${category}`);
             setSelectedCategory(response);
         } catch (error) {
             console.error('Error fetching category details:', error);
@@ -27,7 +28,7 @@ const ModalCategories = ({ categories, onClose }) => {
         <Text style={styles.title}>Categorías</Text>
         {categories.map((category, index) => (
             <Pressable key={index} style={styles.categoryItem} onPress={()=>fetchCategory(category)}>
-            <Text style={styles.textCategory}>{category}</Text>
+            <Text style={styles.textCategory}>{categoryNames[category]||category}</Text>
           </Pressable>
         ))}
       </View>

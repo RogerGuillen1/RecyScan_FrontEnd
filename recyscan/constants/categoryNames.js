@@ -1,11 +1,12 @@
 const categoryNames = {
+    "battery": "Baterías",
     "cardboard": "Cartón",
     "glass": "Vidrio",
     "metal": "Metal",
     "paper": "Papel",
     "plastic": "Plástico",
     "organic": "Orgánico",
-    "clothes": "Textil",
+    "clothes": "Téxtil",
     "vegetation": "Vegetación",
     "miscellaneous": "Misceláneo",
     "shoes": "Calzado"

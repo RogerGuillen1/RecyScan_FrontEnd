@@ -5,6 +5,7 @@ import categoryNames from '../../constants/categoryNames';
 import get from '../../constants/get';
 import ModalCategories from '../../components/ModalCategories';
 import InfoCircleIcon from '../../assets/svg/InfoIcon';
+import { LinearGradient } from 'expo-linear-gradient'
 
 const index =()=>{
 
@@ -91,14 +92,30 @@ const index =()=>{
     }
     };
 
+const gradientColors = ['#007AFF', '#00C6FF'];
+const disabledColors = ['#8aaee0', '#b9d6ef'];
+const backgroundGradientColors = ['#2C3E50', '#19453eff'];
+
     return <>
-    <View style={styles.container}>
+    <LinearGradient
+            colors={backgroundGradientColors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }} // Degradado vertical
+            style={styles.container}
+        >
       <Pressable onPress={getCategories} style={{position: 'absolute', top: 100, right: 20}}>
         <InfoCircleIcon/>
         </Pressable>
-        <Image source={require("../../assets/images/logotext.png")} style={styles.image}/>
-        <Pressable onPress={openCamera} style={styles.button}>
-            <Text style={styles.buttonText}>{!photo?"Hacer foto":"Repetir foto"}</Text>
+        <Image source={require("../../assets/images/logorender.png")} style={styles.image}/>
+        <Pressable onPress={openCamera} style={styles.buttonWrapper}>
+             <LinearGradient
+                colors={gradientColors}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.gradientButton}
+            >
+                <Text style={styles.buttonText}>{!photo ? "Hacer foto" : "Repetir foto"}</Text>
+            </LinearGradient>
         </Pressable>
         {photo && (
             <View>
@@ -107,35 +124,40 @@ const index =()=>{
           style={{ width: 200, height: 200, marginTop: 20 }}
         />
         {!answer && (
-
+          // Botón de Enviar con Degradado y control de 'loading'
           <Pressable 
           onPress={sendPhoto} 
-          style={[styles.button, loading && styles.buttonDisabled]} 
           disabled={loading} // Disable press while loading
+          style={styles.buttonWrapper}
           >
-            {loading ? (
-              <ActivityIndicator color="#FFFFFF" /> // Show loading circle
-            ) : (
-              <Text style={styles.buttonText}>Enviar foto</Text> // Show text when not loading
-            )}
+            <LinearGradient
+                colors={loading ? disabledColors : gradientColors}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.gradientButton}
+            >
+                {loading ? (
+                    <ActivityIndicator color="#FFFFFF" /> // Show loading circle
+                ) : (
+                    <Text style={styles.buttonText}>Enviar foto</Text> // Show text when not loading
+                )}
+            </LinearGradient>
         </Pressable>
             )}
         </View>
       )}
-        {answer ?
+        {answer?.contenedor ?
         <View style={styles.answerContainer}>
           <Text style={styles.answerText}>Categoria: {answer?.nombre||categoryNames[answer.categoria]}</Text>
           <Text style={styles.answerText}>Probabilidad: {(answer.confianza.toFixed(4)*100).toFixed(2)} %</Text>
           <Text style={styles.answerText}>Contenedor: {answer.contenedor}</Text>
-          <Text style={styles.answerText}>Instrucciones: {answer.instruccion}</Text>
           </View>:
           <View style={styles.answerContainer}>
-          <Text style={styles.answerText}> </Text>
-          <Text style={styles.answerText}> </Text>
-          <Text style={styles.answerText}> </Text>
+          <Text style={styles.answerText}>Toma una foto de un residuo</Text>
+          <Text style={styles.answerText}>Nuestra IA te indicará cómo reciclarlo </Text>
           <Text style={styles.answerText}> </Text>
           </View>}
-        </View>
+        </LinearGradient>
         {categoriesList.length>0 &&
         <ModalCategories categories={categoriesList} onClose={()=>{
           setCategoriesList([]);
@@ -162,13 +184,24 @@ image:{
 button:{
     marginTop:20,
     padding:10,
-    backgroundColor:'#007AFF',
     borderRadius:5,
     minWidth: 100, // Added minWidth to maintain size during loading
     justifyContent: 'center', // Center content
 },
 buttonDisabled:{ // Optional style for when the button is disabled
     backgroundColor:'#8aaee0'
+},
+buttonWrapper: {
+    marginTop: 20,
+    borderRadius: 5,
+    overflow: 'hidden', // Importante para que el Pressable respete el borderRadius
+    minWidth: 100,
+},
+gradientButton:{
+    padding: 10,
+    minWidth: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
 },
 buttonText:{
     color:'#FFFFFF',
@@ -181,5 +214,6 @@ answerText:{
 answerContainer:{
     marginTop:20,
     alignItems:'center',
-  gap: 10
+  gap: 10,
+  maxWidth: '80%',
 }}
