@@ -10,3 +10,11 @@ Para Ejectuar:
 2. Ejecutar el comando "npm i" para instalar las librerias requeridas
 3. Ejecutar el comando "npx expo start" para poner en marcha el front
 4. Escanear el código QR que vereis en pantalla con la app "Expo go"
+
+
+Descargar apk:
+
+1. Pulsar en este enlace desde un teléfono android: https://drive.google.com/file/d/10gzR1V52sFNqpU2sH9PBfsn7AVOeEjHE/view?usp=drive_link
+2. Pulsar en descargar
+3. Ejecutar la apk descargada para instalar la aplicación
+4. Abrir la aplicación instalada

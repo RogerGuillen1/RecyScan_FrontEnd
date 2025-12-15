@@ -1,11 +1,12 @@
-import { View, Text, Pressable, Image, BackHandler, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, Pressable, Text, View } from 'react-native';
+import InfoCircleIcon from '../../assets/svg/InfoIcon';
+import ModalCategories from '../../components/ModalCategories';
 import categoryNames from '../../constants/categoryNames';
 import get from '../../constants/get';
-import ModalCategories from '../../components/ModalCategories';
-import InfoCircleIcon from '../../assets/svg/InfoIcon';
-import { LinearGradient } from 'expo-linear-gradient'
+import url from '../../constants/url';
 
 const index =()=>{
 
@@ -14,6 +15,8 @@ const index =()=>{
     const [answer, setAnswer] = useState(null);
     const [loading, setLoading] = useState(false);
     const [categoriesList, setCategoriesList] = useState([]);
+    const [health, setHealth]=useState(false)
+    const [generalLoading, setGeneralLoading] = useState(false)
 
     const getCategories = async () => {
       try {
@@ -26,9 +29,30 @@ const index =()=>{
     useEffect(() => {
         const askPermission = async()=>{
         const cameraStatus = await ImagePicker.requestCameraPermissionsAsync();
-        setPermission(cameraStatus.status === 'granted');
+        setPermission(cameraStatus.status === 'granted');  
       }
       askPermission();
+    },[]);
+
+    useEffect(() => {
+      const getHealth =async()=>{
+        try{
+          setGeneralLoading(true)
+          const response = await get('health');
+          if (!response) {
+            setHealth(false);
+          }
+          if(response.model_status === "ready"){
+            setHealth(true)
+          }
+        }catch{
+          setHealth(false)
+        }
+        finally{
+          setGeneralLoading(false)
+        }
+      }
+      getHealth()
     },[]);
     
   const openCamera = async () => {
@@ -71,7 +95,6 @@ const index =()=>{
 
     console.log("FormData prepared:", formData);
     try {
-      const url = 'https://recyscan-backend.onrender.com/';
       const response = await fetch(`${url}predict`, {
         method: 'POST',
         body: formData,
@@ -96,75 +119,95 @@ const gradientColors = ['#007AFF', '#00C6FF'];
 const disabledColors = ['#8aaee0', '#b9d6ef'];
 const backgroundGradientColors = ['#2C3E50', '#19453eff'];
 
-    return <>
+return (
+  <>
     <LinearGradient
-            colors={backgroundGradientColors}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }} // Degradado vertical
-            style={styles.container}
-        >
-      <Pressable onPress={getCategories} style={{position: 'absolute', top: 100, right: 20}}>
-        <InfoCircleIcon/>
+  colors={backgroundGradientColors}
+  start={{ x: 0, y: 0 }}
+  end={{ x: 0, y: 1 }}
+  style={styles.container}
+>
+  {generalLoading ? (
+    <ActivityIndicator size="large" color="white" style={{ transform: [{ scale:2 }] }}/>
+  ) : (
+    <>
+      {health && (
+        <Pressable onPress={getCategories} style={{ position: 'absolute', top: 100, right: 20 }}>
+          <InfoCircleIcon />
         </Pressable>
-        <Image source={require("../../assets/images/logorender.png")} style={styles.image}/>
-        <Pressable onPress={openCamera} style={styles.buttonWrapper}>
-             <LinearGradient
-                colors={gradientColors}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.gradientButton}
-            >
-                <Text style={styles.buttonText}>{!photo ? "Hacer foto" : "Repetir foto"}</Text>
-            </LinearGradient>
-        </Pressable>
-        {photo && (
-            <View>
-        <Image
-          source={{ uri: photo }}
-          style={{ width: 200, height: 200, marginTop: 20 }}
-        />
-        {!answer && (
-          // Botón de Enviar con Degradado y control de 'loading'
-          <Pressable 
-          onPress={sendPhoto} 
-          disabled={loading} // Disable press while loading
-          style={styles.buttonWrapper}
-          >
-            <LinearGradient
-                colors={loading ? disabledColors : gradientColors}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.gradientButton}
-            >
-                {loading ? (
-                    <ActivityIndicator color="#FFFFFF" /> // Show loading circle
-                ) : (
-                    <Text style={styles.buttonText}>Enviar foto</Text> // Show text when not loading
-                )}
-            </LinearGradient>
-        </Pressable>
-            )}
-        </View>
       )}
-        {answer?.contenedor ?
-        <View style={styles.answerContainer}>
-          <Text style={styles.answerText}>Categoria: {answer?.nombre||categoryNames[answer.categoria]}</Text>
-          <Text style={styles.answerText}>Probabilidad: {(answer.confianza.toFixed(4)*100).toFixed(2)} %</Text>
-          <Text style={styles.answerText}>Contenedor: {answer.contenedor}</Text>
-          </View>:
-          <View style={styles.answerContainer}>
-          <Text style={styles.answerText}>Toma una foto de un residuo</Text>
-          <Text style={styles.answerText}>Nuestra IA te indicará cómo reciclarlo </Text>
-          <Text style={styles.answerText}> </Text>
-          </View>}
-        </LinearGradient>
-        {categoriesList.length>0 &&
-        <ModalCategories categories={categoriesList} onClose={()=>{
-          setCategoriesList([]);
-        }} />
-      }
+
+      <Image source={require("../../assets/images/logorender.png")} style={styles.image} />
+
+      {health ? (
+        <>
+          {/* CAMERA BUTTON */}
+          <Pressable onPress={openCamera} style={styles.buttonWrapper}>
+            <LinearGradient
+              colors={gradientColors}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.gradientButton}
+            >
+              <Text style={styles.buttonText}>{!photo ? "Hacer foto" : "Repetir foto"}</Text>
+            </LinearGradient>
+          </Pressable>
+
+          {/* PHOTO PREVIEW + SEND */}
+          {photo && (
+            <View>
+              <Image source={{ uri: photo }} style={{ width: 200, height: 200, marginTop: 20 }} />
+              {!answer && (
+                <Pressable onPress={sendPhoto} disabled={loading} style={styles.buttonWrapper}>
+                  <LinearGradient
+                    colors={loading ? disabledColors : gradientColors}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.gradientButton}
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="#FFFFFF" />
+                    ) : (
+                      <Text style={styles.buttonText}>Enviar foto</Text>
+                    )}
+                  </LinearGradient>
+                </Pressable>
+              )}
+            </View>
+          )}
+
+          {/* ANSWER */}
+          {answer?.contenedor ? (
+            <View style={styles.answerContainer}>
+              <Text style={styles.answerText}>Categoria: {answer?.nombre || categoryNames[answer.categoria]}</Text>
+              <Text style={styles.answerText}>Probabilidad: {(answer.confianza * 100).toFixed(2)} %</Text>
+              <Text style={styles.answerText}>Contenedor: {answer.contenedor}</Text>
+            </View>
+          ) : (
+            <View style={styles.answerContainer}>
+              <Text style={styles.answerText}>Toma una foto de un residuo</Text>
+              <Text style={styles.answerText}>Nuestra IA te indicará cómo reciclarlo</Text>
+            </View>
+          )}
+        </>
+      ) : (
+        <Text style={styles.answerText}>No hay conexión con el servidor</Text>
+      )}
     </>
+  )}
+</LinearGradient>
+
+      
+      {categoriesList.length > 0 && (
+        <ModalCategories
+        categories={categoriesList}
+        onClose={() => setCategoriesList([])}
+        />
+      )}
+  </>
+);
 }
+
 
 export default index; 
 
